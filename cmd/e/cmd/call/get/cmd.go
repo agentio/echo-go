@@ -50,7 +50,7 @@ func Cmd() *cobra.Command {
 	}
 	cmd.Flags().StringVar(&message, "message", "hello", "message")
 	cmd.Flags().StringVar(&address, "address", "", "address of the echo server to use")
-	cmd.Flags().StringVar(&stack, "stack", "grpc", "stack to use to connect")
 	cmd.Flags().BoolVar(&useTLS, "tls", false, "use tls for connections")
+	cmd.Flags().StringVar(&stack, "stack", "grpc", "stack to use to connect")
 	return cmd
 }
