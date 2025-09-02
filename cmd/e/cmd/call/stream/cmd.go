@@ -21,7 +21,7 @@ func Cmd() *cobra.Command {
 		Short: "Call the stream method",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			conn, err := connection.NewConnection(address, useTLS)
+			conn, err := connection.NewGRPCConnection(address, useTLS)
 			if err != nil {
 				return err
 			}
