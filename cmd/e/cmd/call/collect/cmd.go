@@ -1,7 +1,6 @@
 package collect
 
 import (
-	"context"
 	"fmt"
 	"log"
 
@@ -28,8 +27,8 @@ func Cmd() *cobra.Command {
 					return err
 				}
 				defer conn.Close()
-				c := echopb.NewEchoClient(conn)
-				stream, err := c.Collect(context.Background())
+				client := echopb.NewEchoClient(conn)
+				stream, err := client.Collect(cmd.Context())
 				if err != nil {
 					return err
 				}
@@ -48,7 +47,7 @@ func Cmd() *cobra.Command {
 				if err != nil {
 					return nil
 				}
-				stream := client.Collect(context.Background())
+				stream := client.Collect(cmd.Context())
 				for i := 0; i < count; i++ {
 					if err := stream.Send(&echopb.EchoRequest{
 						Text: fmt.Sprintf("%s %d", message, i),

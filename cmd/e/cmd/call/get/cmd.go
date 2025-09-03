@@ -1,7 +1,6 @@
 package get
 
 import (
-	"context"
 	"fmt"
 	"log"
 
@@ -28,8 +27,8 @@ func Cmd() *cobra.Command {
 					return err
 				}
 				defer conn.Close()
-				c := echopb.NewEchoClient(conn)
-				response, err := c.Get(context.Background(), &echopb.EchoRequest{Text: message})
+				client := echopb.NewEchoClient(conn)
+				response, err := client.Get(cmd.Context(), &echopb.EchoRequest{Text: message})
 				if err != nil {
 					return err
 				}
@@ -37,14 +36,11 @@ func Cmd() *cobra.Command {
 				return nil
 			case "connect", "connect-grpc", "connect-grpc-web":
 				client, err := connection.NewConnectEchoClient(address, useTLS, stack)
-				res, err := client.Get(
-					context.Background(),
-					connect.NewRequest(&echopb.EchoRequest{Text: message}),
-				)
+				response, err := client.Get(cmd.Context(), connect.NewRequest(&echopb.EchoRequest{Text: message}))
 				if err != nil {
 					return err
 				}
-				log.Println(res.Msg.Text)
+				log.Printf("Received: %s", response.Msg.Text)
 				return nil
 			default:
 				return fmt.Errorf("unsupported stack: %s", stack)

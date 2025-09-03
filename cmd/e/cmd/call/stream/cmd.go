@@ -1,7 +1,6 @@
 package stream
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -30,8 +29,8 @@ func Cmd() *cobra.Command {
 					return err
 				}
 				defer conn.Close()
-				c := echopb.NewEchoClient(conn)
-				stream, err := c.Stream(context.Background())
+				client := echopb.NewEchoClient(conn)
+				stream, err := client.Stream(cmd.Context())
 				if err != nil {
 					return err
 				}
@@ -40,7 +39,6 @@ func Cmd() *cobra.Command {
 					for {
 						in, err := stream.Recv()
 						if err == io.EOF {
-							// read done.
 							close(waitc)
 							return
 						}
@@ -65,13 +63,12 @@ func Cmd() *cobra.Command {
 				if err != nil {
 					return nil
 				}
-				stream := client.Stream(context.Background())
+				stream := client.Stream(cmd.Context())
 				waitc := make(chan struct{})
 				go func() {
 					for {
 						in, err := stream.Receive()
 						if errors.Is(err, io.EOF) {
-							// read done.
 							close(waitc)
 							return
 						}

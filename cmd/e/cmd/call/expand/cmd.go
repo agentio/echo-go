@@ -1,7 +1,6 @@
 package expand
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"log"
@@ -29,15 +28,14 @@ func Cmd() *cobra.Command {
 					return err
 				}
 				defer conn.Close()
-				c := echopb.NewEchoClient(conn)
-				stream, err := c.Expand(context.Background(), &echopb.EchoRequest{Text: message})
+				client := echopb.NewEchoClient(conn)
+				stream, err := client.Expand(cmd.Context(), &echopb.EchoRequest{Text: message})
 				if err != nil {
 					return err
 				}
 				for {
 					in, err := stream.Recv()
 					if err == io.EOF {
-						// read done.
 						return nil
 					}
 					if err != nil {
@@ -50,8 +48,7 @@ func Cmd() *cobra.Command {
 				if err != nil {
 					return nil
 				}
-				stream, err := client.Expand(context.Background(),
-					connect.NewRequest(&echopb.EchoRequest{Text: message}))
+				stream, err := client.Expand(cmd.Context(), connect.NewRequest(&echopb.EchoRequest{Text: message}))
 				if err != nil {
 					return err
 				}
