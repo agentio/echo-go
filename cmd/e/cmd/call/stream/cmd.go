@@ -2,6 +2,7 @@ package stream
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -58,11 +59,41 @@ func Cmd() *cobra.Command {
 				}
 				stream.CloseSend()
 				<-waitc
-			default:
-				log.Printf("TODO")
 				return nil
+			case "connect", "connect-grpc", "connect-grpc-web":
+				client, err := connection.NewConnectEchoClient(address, useTLS, stack)
+				if err != nil {
+					return nil
+				}
+				stream := client.Stream(context.Background())
+				waitc := make(chan struct{})
+				go func() {
+					for {
+						in, err := stream.Receive()
+						if errors.Is(err, io.EOF) {
+							// read done.
+							close(waitc)
+							return
+						}
+						if err != nil {
+							log.Fatalf("Failed to receive an echo : %v", err)
+						}
+						log.Printf("Received: %s", in.Text)
+					}
+				}()
+				for i := 0; i < count; i++ {
+					if err := stream.Send(&echopb.EchoRequest{
+						Text: fmt.Sprintf("%s %d", message, i),
+					}); err != nil {
+						return err
+					}
+				}
+				stream.CloseRequest()
+				<-waitc
+				return nil
+			default:
+				return fmt.Errorf("unsupported stack: %s", stack)
 			}
-			return nil
 		},
 	}
 	cmd.Flags().StringVar(&message, "message", "hello", "message")

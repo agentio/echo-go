@@ -43,9 +43,24 @@ func Cmd() *cobra.Command {
 				response, err := stream.CloseAndRecv()
 				log.Printf("Received: %s", response.Text)
 				return nil
-			default:
-				log.Printf("TODO")
+			case "connect", "connect-grpc", "connect-grpc-web":
+				client, err := connection.NewConnectEchoClient(address, useTLS, stack)
+				if err != nil {
+					return nil
+				}
+				stream := client.Collect(context.Background())
+				for i := 0; i < count; i++ {
+					if err := stream.Send(&echopb.EchoRequest{
+						Text: fmt.Sprintf("%s %d", message, i),
+					}); err != nil {
+						return err
+					}
+				}
+				response, err := stream.CloseAndReceive()
+				log.Printf("Received: %s", response.Msg.Text)
 				return nil
+			default:
+				return fmt.Errorf("unsupported stack: %s", stack)
 			}
 		},
 	}

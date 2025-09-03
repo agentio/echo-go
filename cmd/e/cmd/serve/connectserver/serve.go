@@ -71,8 +71,8 @@ func (s echoServer) Collect(
 ) (*connect.Response[echopb.EchoResponse], error) {
 	parts := []string{}
 	for {
-		done := stream.Receive()
-		if !done {
+		running := stream.Receive()
+		if !running {
 			return connect.NewResponse(
 				&echopb.EchoResponse{
 					Text: fmt.Sprintf("Go echo collect: %s", strings.Join(parts, " ")),

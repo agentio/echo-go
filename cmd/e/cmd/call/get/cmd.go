@@ -2,6 +2,7 @@ package get
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"connectrpc.com/connect"
@@ -33,6 +34,7 @@ func Cmd() *cobra.Command {
 					return err
 				}
 				log.Printf("Received: %s", response.Text)
+				return nil
 			case "connect", "connect-grpc", "connect-grpc-web":
 				client, err := connection.NewConnectEchoClient(address, useTLS, stack)
 				res, err := client.Get(
@@ -43,9 +45,10 @@ func Cmd() *cobra.Command {
 					return err
 				}
 				log.Println(res.Msg.Text)
+				return nil
 			default:
+				return fmt.Errorf("unsupported stack: %s", stack)
 			}
-			return nil
 		},
 	}
 	cmd.Flags().StringVar(&message, "message", "hello", "message")

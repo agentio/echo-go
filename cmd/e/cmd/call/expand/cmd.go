@@ -2,9 +2,11 @@ package expand
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 
+	"connectrpc.com/connect"
 	"github.com/agentio/echo/cmd/e/pkg/connection"
 	"github.com/agentio/echo/genproto/echopb"
 	"github.com/spf13/cobra"
@@ -43,9 +45,27 @@ func Cmd() *cobra.Command {
 					}
 					log.Printf("Received: %s", in.Text)
 				}
-			default:
-				log.Printf("TODO")
+			case "connect", "connect-grpc", "connect-grpc-web":
+				client, err := connection.NewConnectEchoClient(address, useTLS, stack)
+				if err != nil {
+					return nil
+				}
+				stream, err := client.Expand(context.Background(),
+					connect.NewRequest(&echopb.EchoRequest{Text: message}))
+				if err != nil {
+					return err
+				}
+				for {
+					running := stream.Receive()
+					if !running {
+						break
+					}
+					in := stream.Msg()
+					log.Printf("Received: %s", in.Text)
+				}
 				return nil
+			default:
+				return fmt.Errorf("unsupported stack: %s", stack)
 			}
 		},
 	}
