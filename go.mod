@@ -1,4 +1,4 @@
-module github.com/agentio/echo
+module github.com/agentio/echo-go
 
 go 1.24.6
 

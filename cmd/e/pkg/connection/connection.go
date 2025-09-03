@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
-	"github.com/agentio/echo/genproto/echopb/echopbconnect"
+	"github.com/agentio/echo-go/genproto/echopb/echopbconnect"
 	"golang.org/x/net/http2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

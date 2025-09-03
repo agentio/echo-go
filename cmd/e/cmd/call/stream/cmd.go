@@ -6,8 +6,8 @@ import (
 	"io"
 	"log"
 
-	"github.com/agentio/echo/cmd/e/pkg/connection"
-	"github.com/agentio/echo/genproto/echopb"
+	"github.com/agentio/echo-go/cmd/e/pkg/connection"
+	"github.com/agentio/echo-go/genproto/echopb"
 	"github.com/spf13/cobra"
 )
 

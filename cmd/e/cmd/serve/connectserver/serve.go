@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"github.com/agentio/echo/genproto/echopb"
-	"github.com/agentio/echo/genproto/echopb/echopbconnect"
+	"github.com/agentio/echo-go/genproto/echopb"
+	"github.com/agentio/echo-go/genproto/echopb/echopbconnect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )

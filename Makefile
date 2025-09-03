@@ -21,7 +21,7 @@ rpc:
 	mkdir -p genproto
 	protoc ${APIS} \
 	--proto_path='proto' \
-	--go_opt='module=github.com/agentio/echo/genproto' \
+	--go_opt='module=github.com/agentio/echo-go/genproto' \
 	--go_out='genproto'
 
 grpc:
@@ -29,7 +29,7 @@ grpc:
 	mkdir -p genproto
 	protoc ${APIS} \
 	--proto_path='proto' \
-	--go-grpc_opt='module=github.com/agentio/echo/genproto' \
+	--go-grpc_opt='module=github.com/agentio/echo-go/genproto' \
 	--go-grpc_out='genproto'
 
 connect:
@@ -37,5 +37,5 @@ connect:
 	mkdir -p genproto
 	protoc ${APIS} \
 	--proto_path='proto' \
-	--connect-go_opt='module=github.com/agentio/echo/genproto' \
+	--connect-go_opt='module=github.com/agentio/echo-go/genproto' \
 	--connect-go_out='genproto'

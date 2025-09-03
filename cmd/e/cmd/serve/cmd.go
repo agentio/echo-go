@@ -3,8 +3,8 @@ package serve
 import (
 	"errors"
 
-	"github.com/agentio/echo/cmd/e/cmd/serve/connectserver"
-	"github.com/agentio/echo/cmd/e/cmd/serve/grpcserver"
+	"github.com/agentio/echo-go/cmd/e/cmd/serve/connectserver"
+	"github.com/agentio/echo-go/cmd/e/cmd/serve/grpcserver"
 	"github.com/spf13/cobra"
 )
 

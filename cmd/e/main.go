@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/agentio/echo/cmd/e/cmd"
+	"github.com/agentio/echo-go/cmd/e/cmd"
 )
 
 func main() {

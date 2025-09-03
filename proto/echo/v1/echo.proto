@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package echo.v1;
 
-option go_package = "github.com/agentio/echo/genproto/echopb;echopb";
+option go_package = "github.com/agentio/echo-go/genproto/echopb;echopb";
 
 service Echo {
   // Immediately returns an echo of a request.

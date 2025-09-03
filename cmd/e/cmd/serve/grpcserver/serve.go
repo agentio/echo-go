@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/agentio/echo/genproto/echopb"
+	"github.com/agentio/echo-go/genproto/echopb"
 	"google.golang.org/grpc"
 )
 
