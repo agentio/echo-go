@@ -1,10 +1,10 @@
 package call
 
 import (
-	"github.com/agentio/echo-go/internal/call/collect"
-	"github.com/agentio/echo-go/internal/call/expand"
-	"github.com/agentio/echo-go/internal/call/get"
-	"github.com/agentio/echo-go/internal/call/stream"
+	"github.com/agentio/echo-go/internal/cmd/call/collect"
+	"github.com/agentio/echo-go/internal/cmd/call/expand"
+	"github.com/agentio/echo-go/internal/cmd/call/get"
+	"github.com/agentio/echo-go/internal/cmd/call/stream"
 	"github.com/spf13/cobra"
 )
 

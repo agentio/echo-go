@@ -6,7 +6,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/agentio/echo-go/genproto/echopb"
-	"github.com/agentio/echo-go/pkg/connection"
+	"github.com/agentio/echo-go/internal/connection"
 	"github.com/spf13/cobra"
 )
 
