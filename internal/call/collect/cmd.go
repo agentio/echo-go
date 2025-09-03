@@ -1,13 +1,11 @@
-package stream
+package collect
 
 import (
-	"errors"
 	"fmt"
-	"io"
 	"log"
 
-	"github.com/agentio/echo-go/cmd/e/pkg/connection"
 	"github.com/agentio/echo-go/genproto/echopb"
+	"github.com/agentio/echo-go/pkg/connection"
 	"github.com/spf13/cobra"
 )
 
@@ -18,8 +16,8 @@ func Cmd() *cobra.Command {
 	var count int
 	var stack string
 	cmd := &cobra.Command{
-		Use:   "stream",
-		Short: "Call the stream method",
+		Use:   "collect",
+		Short: "Call the collect method",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			switch stack {
@@ -30,24 +28,10 @@ func Cmd() *cobra.Command {
 				}
 				defer conn.Close()
 				client := echopb.NewEchoClient(conn)
-				stream, err := client.Stream(cmd.Context())
+				stream, err := client.Collect(cmd.Context())
 				if err != nil {
 					return err
 				}
-				waitc := make(chan struct{})
-				go func() {
-					for {
-						in, err := stream.Recv()
-						if err == io.EOF {
-							close(waitc)
-							return
-						}
-						if err != nil {
-							log.Fatalf("Failed to receive an echo : %v", err)
-						}
-						log.Printf("Received: %s", in.Text)
-					}
-				}()
 				for i := 0; i < count; i++ {
 					if err := stream.Send(&echopb.EchoRequest{
 						Text: fmt.Sprintf("%s %d", message, i),
@@ -55,29 +39,15 @@ func Cmd() *cobra.Command {
 						return err
 					}
 				}
-				stream.CloseSend()
-				<-waitc
+				response, err := stream.CloseAndRecv()
+				log.Printf("Received: %s", response.Text)
 				return nil
 			case "connect", "connect-grpc", "connect-grpc-web":
 				client, err := connection.NewConnectEchoClient(address, useTLS, stack)
 				if err != nil {
 					return nil
 				}
-				stream := client.Stream(cmd.Context())
-				waitc := make(chan struct{})
-				go func() {
-					for {
-						in, err := stream.Receive()
-						if errors.Is(err, io.EOF) {
-							close(waitc)
-							return
-						}
-						if err != nil {
-							log.Fatalf("Failed to receive an echo : %v", err)
-						}
-						log.Printf("Received: %s", in.Text)
-					}
-				}()
+				stream := client.Collect(cmd.Context())
 				for i := 0; i < count; i++ {
 					if err := stream.Send(&echopb.EchoRequest{
 						Text: fmt.Sprintf("%s %d", message, i),
@@ -85,8 +55,8 @@ func Cmd() *cobra.Command {
 						return err
 					}
 				}
-				stream.CloseRequest()
-				<-waitc
+				response, err := stream.CloseAndReceive()
+				log.Printf("Received: %s", response.Msg.Text)
 				return nil
 			default:
 				return fmt.Errorf("unsupported stack: %s", stack)
