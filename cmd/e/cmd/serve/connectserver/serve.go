@@ -18,7 +18,6 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-// main.go (continued)
 func Run(port int) error {
 	mux := http.NewServeMux()
 	mux.Handle(echopbconnect.NewEchoHandler(&echoServer{}))
@@ -73,16 +72,17 @@ func (s echoServer) Collect(
 	for {
 		running := stream.Receive()
 		if !running {
-			return connect.NewResponse(
-				&echopb.EchoResponse{
-					Text: fmt.Sprintf("Go echo collect: %s", strings.Join(parts, " ")),
-				},
-			), nil
+			break
 		}
 		request := stream.Msg()
 		fmt.Printf("Collect received: %s\n", request.Text)
 		parts = append(parts, request.Text)
 	}
+	return connect.NewResponse(
+		&echopb.EchoResponse{
+			Text: fmt.Sprintf("Go echo collect: %s", strings.Join(parts, " ")),
+		},
+	), nil
 }
 
 // Streams back messages as they are received in an input stream.
@@ -93,19 +93,17 @@ func (s echoServer) Stream(
 	count := 0
 	for {
 		request, err := stream.Receive()
+		if errors.Is(err, io.EOF) {
+			return nil
+		}
 		if err != nil {
-			if errors.Is(err, io.EOF) {
-				return nil
-			}
 			return err
 		}
 		fmt.Printf("Stream received: %s\n", request.Text)
 		count++
-		if err := stream.Send(
-			&echopb.EchoResponse{
-				Text: fmt.Sprintf("Go echo stream (%d): %s", count, request.Text),
-			},
-		); err != nil {
+		if err := stream.Send(&echopb.EchoResponse{
+			Text: fmt.Sprintf("Go echo stream (%d): %s", count, request.Text),
+		}); err != nil {
 			return err
 		}
 	}

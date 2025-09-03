@@ -1,26 +1,29 @@
 package connection
 
 import (
+	"crypto/tls"
+	"net"
 	"net/http"
 
 	"connectrpc.com/connect"
 	"github.com/agentio/echo/genproto/echopb/echopbconnect"
+	"golang.org/x/net/http2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 func NewGRPCConnection(address string, useTLS bool) (*grpc.ClientConn, error) {
-	if !useTLS {
-		if address == "" {
-			address = "localhost:8080"
-		}
-		return grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	} else {
+	if useTLS {
 		if address == "" {
 			address = "localhost:443"
 		}
 		return grpc.NewClient(address, grpc.WithTransportCredentials(credentials.NewTLS(nil)))
+	} else {
+		if address == "" {
+			address = "localhost:8080"
+		}
+		return grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 }
 
@@ -29,10 +32,20 @@ func NewConnectEchoClient(address string, useTLS bool, stack string) (echopbconn
 		address = "localhost"
 	}
 	var url string
+	var httpClient *http.Client
 	if useTLS {
 		url = "https://" + address
+		httpClient = http.DefaultClient
 	} else {
 		url = "http://" + address
+		httpClient = &http.Client{
+			Transport: &http2.Transport{
+				AllowHTTP: true,
+				DialTLS: func(network, addr string, _ *tls.Config) (net.Conn, error) {
+					return net.Dial(network, addr)
+				},
+			},
+		}
 	}
 	options := []connect.ClientOption{}
 	switch stack {
@@ -43,7 +56,7 @@ func NewConnectEchoClient(address string, useTLS bool, stack string) (echopbconn
 	default:
 	}
 	return echopbconnect.NewEchoClient(
-		http.DefaultClient,
+		httpClient,
 		url,
 		options...,
 	), nil
