@@ -1,8 +1,8 @@
-package cmd
+package commands
 
 import (
-	"github.com/agentio/echo-go/internal/cmd/call"
-	"github.com/agentio/echo-go/internal/cmd/serve"
+	"github.com/agentio/echo-go/internal/commands/call"
+	"github.com/agentio/echo-go/internal/commands/serve"
 	"github.com/spf13/cobra"
 )
 
