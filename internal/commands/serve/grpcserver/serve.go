@@ -7,13 +7,15 @@ import (
 	"log"
 	"net"
 	"strings"
-	"time"
 
 	"github.com/agentio/echo-go/genproto/echopb"
 	"google.golang.org/grpc"
 )
 
-func Run(port int, socket string) error {
+var verbose bool
+
+func Run(port int, socket string, _verbose bool) error {
+	verbose = _verbose
 	var lis net.Listener
 	var err error
 	if socket != "" {
@@ -37,7 +39,9 @@ type echoServer struct {
 
 // Immediately returns an echo of a request.
 func (s *echoServer) Get(ctx context.Context, request *echopb.EchoRequest) (*echopb.EchoResponse, error) {
-	fmt.Printf("Get received: %s\n", request.Text)
+	if verbose {
+		log.Printf("Get received: %s", request.Text)
+	}
 	return &echopb.EchoResponse{
 		Text: "Go echo get: " + request.Text,
 	}, nil
@@ -45,7 +49,9 @@ func (s *echoServer) Get(ctx context.Context, request *echopb.EchoRequest) (*ech
 
 // Splits a request into words and returns each word in a stream of messages.
 func (s *echoServer) Expand(request *echopb.EchoRequest, stream echopb.Echo_ExpandServer) error {
-	fmt.Printf("Expand received: %s\n", request.Text)
+	if verbose {
+		log.Printf("Expand received: %s", request.Text)
+	}
 	parts := strings.Split(request.Text, " ")
 	for i, part := range parts {
 		if err := stream.Send(&echopb.EchoResponse{
@@ -53,7 +59,6 @@ func (s *echoServer) Expand(request *echopb.EchoRequest, stream echopb.Echo_Expa
 		}); err != nil {
 			return err
 		}
-		time.Sleep(1 * time.Second)
 	}
 	return nil
 }
@@ -69,7 +74,9 @@ func (s *echoServer) Collect(stream echopb.Echo_CollectServer) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Collect received: %s\n", request.Text)
+		if verbose {
+			log.Printf("Collect received: %s", request.Text)
+		}
 		parts = append(parts, request.Text)
 	}
 	if err := stream.SendAndClose(&echopb.EchoResponse{
@@ -91,7 +98,9 @@ func (s *echoServer) Stream(stream echopb.Echo_StreamServer) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Stream received: %s\n", request.Text)
+		if verbose {
+			log.Printf("Stream received: %s", request.Text)
+		}
 		count++
 		if err := stream.Send(&echopb.EchoResponse{
 			Text: fmt.Sprintf("Go echo stream (%d): %s", count, request.Text),

@@ -11,6 +11,7 @@ import (
 func Cmd() *cobra.Command {
 	var port int
 	var socket string
+	var verbose bool
 	cmd := &cobra.Command{
 		Use:   "serve [PROTOCOL]",
 		Short: "Run the echo server",
@@ -22,9 +23,9 @@ func Cmd() *cobra.Command {
 			}
 			switch protocol {
 			case "", "grpc":
-				return grpcserver.Run(port, socket)
+				return grpcserver.Run(port, socket, verbose)
 			case "connect":
-				return connectserver.Run(port, socket)
+				return connectserver.Run(port, socket, verbose)
 			default:
 				return errors.New("please specify 'grpc' or 'connect'")
 			}
@@ -32,5 +33,6 @@ func Cmd() *cobra.Command {
 	}
 	cmd.Flags().IntVar(&port, "port", 8080, "server port")
 	cmd.Flags().StringVar(&socket, "socket", "", "server socket")
+	cmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose")
 	return cmd
 }

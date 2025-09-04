@@ -9,7 +9,6 @@ import (
 	"net"
 	"net/http"
 	"strings"
-	"time"
 
 	"connectrpc.com/connect"
 	"github.com/agentio/echo-go/genproto/echopb"
@@ -18,7 +17,10 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-func Run(port int, socket string) error {
+var verbose bool
+
+func Run(port int, socket string, _verbose bool) error {
+	verbose = _verbose
 	mux := http.NewServeMux()
 	mux.Handle(echopbconnect.NewEchoHandler(&echoServer{}))
 	var socketListener net.Listener
@@ -44,7 +46,9 @@ type echoServer struct {
 
 // Immediately returns an echo of a request.
 func (s echoServer) Get(ctx context.Context, req *connect.Request[echopb.EchoRequest]) (*connect.Response[echopb.EchoResponse], error) {
-	fmt.Printf("Get received: %s\n", req.Msg.Text)
+	if verbose {
+		log.Printf("Get received: %s", req.Msg.Text)
+	}
 	return connect.NewResponse(&echopb.EchoResponse{
 		Text: "Go echo get: " + req.Msg.Text,
 	}), nil
@@ -56,7 +60,9 @@ func (s echoServer) Expand(
 	req *connect.Request[echopb.EchoRequest],
 	stream *connect.ServerStream[echopb.EchoResponse],
 ) error {
-	fmt.Printf("Expand received: %s\n", req.Msg.Text)
+	if verbose {
+		log.Printf("Expand received: %s", req.Msg.Text)
+	}
 	parts := strings.Split(req.Msg.Text, " ")
 	for i, part := range parts {
 		if err := stream.Send(&echopb.EchoResponse{
@@ -64,7 +70,6 @@ func (s echoServer) Expand(
 		}); err != nil {
 			return err
 		}
-		time.Sleep(1 * time.Second)
 	}
 	return nil
 }
@@ -81,7 +86,9 @@ func (s echoServer) Collect(
 			break
 		}
 		request := stream.Msg()
-		fmt.Printf("Collect received: %s\n", request.Text)
+		if verbose {
+			log.Printf("Collect received: %s", request.Text)
+		}
 		parts = append(parts, request.Text)
 	}
 	return connect.NewResponse(
@@ -105,7 +112,9 @@ func (s echoServer) Stream(
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Stream received: %s\n", request.Text)
+		if verbose {
+			log.Printf("Stream received: %s", request.Text)
+		}
 		count++
 		if err := stream.Send(&echopb.EchoResponse{
 			Text: fmt.Sprintf("Go echo stream (%d): %s", count, request.Text),

@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/agentio/echo-go/genproto/echopb"
 	"github.com/agentio/echo-go/internal/connection"
+	"github.com/agentio/echo-go/internal/track"
 	"github.com/spf13/cobra"
 )
 
@@ -16,6 +18,7 @@ func Cmd() *cobra.Command {
 	var address string
 	var useTLS bool
 	var stack string
+	var n int
 	cmd := &cobra.Command{
 		Use:   "expand",
 		Short: "Call the expand method",
@@ -29,36 +32,47 @@ func Cmd() *cobra.Command {
 				}
 				defer conn.Close()
 				client := echopb.NewEchoClient(conn)
-				stream, err := client.Expand(cmd.Context(), &echopb.EchoRequest{Text: message})
-				if err != nil {
-					return err
-				}
-				for {
-					in, err := stream.Recv()
-					if err == io.EOF {
-						return nil
-					}
+				defer track.Measure(time.Now(), "expand")
+				for j := 0; j < n; j++ {
+					stream, err := client.Expand(cmd.Context(), &echopb.EchoRequest{Text: message})
 					if err != nil {
 						return err
 					}
-					log.Printf("Received: %s", in.Text)
+					for {
+						in, err := stream.Recv()
+						if err == io.EOF {
+							break
+						}
+						if err != nil {
+							return err
+						}
+						if n == 1 {
+							log.Printf("Received: %s", in.Text)
+						}
+					}
 				}
+				return nil
 			case "connect", "connect-grpc", "connect-grpc-web":
 				client, err := connection.NewConnectEchoClient(address, useTLS, stack)
 				if err != nil {
 					return nil
 				}
-				stream, err := client.Expand(cmd.Context(), connect.NewRequest(&echopb.EchoRequest{Text: message}))
-				if err != nil {
-					return err
-				}
-				for {
-					running := stream.Receive()
-					if !running {
-						break
+				defer track.Measure(time.Now(), "expand")
+				for j := 0; j < n; j++ {
+					stream, err := client.Expand(cmd.Context(), connect.NewRequest(&echopb.EchoRequest{Text: message}))
+					if err != nil {
+						return err
 					}
-					in := stream.Msg()
-					log.Printf("Received: %s", in.Text)
+					for {
+						running := stream.Receive()
+						if !running {
+							break
+						}
+						in := stream.Msg()
+						if n == 1 {
+							log.Printf("Received: %s", in.Text)
+						}
+					}
 				}
 				return nil
 			default:
@@ -70,5 +84,6 @@ func Cmd() *cobra.Command {
 	cmd.Flags().StringVar(&address, "address", "", "address of the echo server to use")
 	cmd.Flags().BoolVar(&useTLS, "tls", false, "use tls for connections")
 	cmd.Flags().StringVar(&stack, "stack", "grpc", "stack to use to connect")
+	cmd.Flags().IntVar(&n, "n", 1, "number of times to call the method")
 	return cmd
 }
