@@ -32,7 +32,7 @@ func Cmd() *cobra.Command {
 				}
 				defer conn.Close()
 				client := echopb.NewEchoClient(conn)
-				defer track.Measure(time.Now(), "expand")
+				defer track.Measure(time.Now(), "expand", n)
 				for j := 0; j < n; j++ {
 					stream, err := client.Expand(cmd.Context(), &echopb.EchoRequest{Text: message})
 					if err != nil {
@@ -57,7 +57,7 @@ func Cmd() *cobra.Command {
 				if err != nil {
 					return nil
 				}
-				defer track.Measure(time.Now(), "expand")
+				defer track.Measure(time.Now(), "expand", n)
 				for j := 0; j < n; j++ {
 					stream, err := client.Expand(cmd.Context(), connect.NewRequest(&echopb.EchoRequest{Text: message}))
 					if err != nil {

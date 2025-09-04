@@ -33,7 +33,7 @@ func Cmd() *cobra.Command {
 				}
 				defer conn.Close()
 				client := echopb.NewEchoClient(conn)
-				defer track.Measure(time.Now(), "stream")
+				defer track.Measure(time.Now(), "stream", n)
 				for j := 0; j < n; j++ {
 					stream, err := client.Stream(cmd.Context())
 					if err != nil {
@@ -71,7 +71,7 @@ func Cmd() *cobra.Command {
 				if err != nil {
 					return nil
 				}
-				defer track.Measure(time.Now(), "stream")
+				defer track.Measure(time.Now(), "stream", n)
 				for j := 0; j < n; j++ {
 					stream := client.Stream(cmd.Context())
 					waitc := make(chan struct{})

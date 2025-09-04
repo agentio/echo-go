@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func Measure(start time.Time, name string) {
+func Measure(start time.Time, name string, count int) {
 	elapsed := time.Since(start)
-	log.Printf("Timing: %s took %s", name, elapsed)
+	log.Printf("Timing: each %s request took %s", name, elapsed/time.Duration(count))
 }
