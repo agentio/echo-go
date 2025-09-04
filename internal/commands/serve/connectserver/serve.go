@@ -18,12 +18,18 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-func Run(port int) error {
+func Run(port int, socket string) error {
 	mux := http.NewServeMux()
 	mux.Handle(echopbconnect.NewEchoHandler(&echoServer{}))
-	log.Printf("serving on %d", port)
 	var socketListener net.Listener
-	socketListener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	var err error
+	if socket != "" {
+		socketListener, err = net.Listen("unix", socket)
+		log.Printf("serving on %s", socket)
+	} else {
+		socketListener, err = net.Listen("tcp", fmt.Sprintf(":%d", port))
+		log.Printf("serving on %d", port)
+	}
 	if err != nil {
 		return err
 	}

@@ -13,14 +13,21 @@ import (
 	"google.golang.org/grpc"
 )
 
-func Run(port int) error {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+func Run(port int, socket string) error {
+	var lis net.Listener
+	var err error
+	if socket != "" {
+		lis, err = net.Listen("unix", socket)
+		log.Printf("serving on %s", socket)
+	} else {
+		lis, err = net.Listen("tcp", fmt.Sprintf(":%d", port))
+		log.Printf("serving on %d", port)
+	}
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
 	echopb.RegisterEchoServer(grpcServer, &echoServer{})
-	log.Printf("serving on %d", port)
 	return grpcServer.Serve(lis)
 }
 

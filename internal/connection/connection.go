@@ -1,9 +1,11 @@
 package connection
 
 import (
+	"context"
 	"crypto/tls"
 	"net"
 	"net/http"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/agentio/echo-go/genproto/echopb/echopbconnect"
@@ -41,8 +43,8 @@ func NewConnectEchoClient(address string, useTLS bool, stack string) (echopbconn
 		httpClient = &http.Client{
 			Transport: &http2.Transport{
 				AllowHTTP: true,
-				DialTLS: func(network, addr string, _ *tls.Config) (net.Conn, error) {
-					return net.Dial(network, addr)
+				DialTLSContext: func(ctx context.Context, network string, addr string, cfg *tls.Config) (net.Conn, error) {
+					return net.DialTimeout(network, addr, 5*time.Second)
 				},
 			},
 		}
