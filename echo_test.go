@@ -23,7 +23,7 @@ func TestServices(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	{
 		getCmd := commands.Cmd()
-		getCmd.SetArgs([]string{"call", "get", "--address", "unix:@echo"})
+		getCmd.SetArgs([]string{"call", "get", "--address", "unix:@echo", "-n", "1000"})
 		err := getCmd.Execute()
 		if err != nil {
 			t.Errorf("%s", err)
@@ -31,7 +31,7 @@ func TestServices(t *testing.T) {
 	}
 	{
 		collectCmd := commands.Cmd()
-		collectCmd.SetArgs([]string{"call", "collect", "--address", "unix:@echo"})
+		collectCmd.SetArgs([]string{"call", "collect", "--address", "unix:@echo", "-n", "1000"})
 		err := collectCmd.Execute()
 		if err != nil {
 			t.Errorf("%s", err)
@@ -39,7 +39,7 @@ func TestServices(t *testing.T) {
 	}
 	{
 		expandCmd := commands.Cmd()
-		expandCmd.SetArgs([]string{"call", "expand", "--address", "unix:@echo"})
+		expandCmd.SetArgs([]string{"call", "expand", "--address", "unix:@echo", "-n", "1000"})
 		err := expandCmd.Execute()
 		if err != nil {
 			t.Errorf("%s", err)
@@ -47,7 +47,7 @@ func TestServices(t *testing.T) {
 	}
 	{
 		streamCmd := commands.Cmd()
-		streamCmd.SetArgs([]string{"call", "stream", "--address", "unix:@echo"})
+		streamCmd.SetArgs([]string{"call", "stream", "--address", "unix:@echo", "-n", "1000"})
 		err := streamCmd.Execute()
 		if err != nil {
 			t.Errorf("%s", err)

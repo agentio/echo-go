@@ -111,6 +111,6 @@ func Cmd() *cobra.Command {
 	cmd.Flags().BoolVar(&useTLS, "tls", false, "use tls for connections")
 	cmd.Flags().IntVar(&count, "count", 3, "number of messages to send")
 	cmd.Flags().StringVar(&stack, "stack", "grpc", "stack to use to connect")
-	cmd.Flags().IntVar(&n, "n", 1, "number of times to call the method")
+	cmd.Flags().IntVarP(&n, "number", "n", 1, "number of times to call the method")
 	return cmd
 }
