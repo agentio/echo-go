@@ -27,10 +27,14 @@ func Run(port int, socket string, _verbose bool) error {
 	var err error
 	if socket != "" {
 		socketListener, err = net.Listen("unix", socket)
-		log.Printf("serving on %s", socket)
+		if verbose {
+			log.Printf("serving on %s", socket)
+		}
 	} else {
 		socketListener, err = net.Listen("tcp", fmt.Sprintf(":%d", port))
-		log.Printf("serving on %d", port)
+		if verbose {
+			log.Printf("serving on %d", port)
+		}
 	}
 	if err != nil {
 		return err
