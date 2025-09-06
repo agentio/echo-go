@@ -11,68 +11,61 @@ import (
 )
 
 func TestSocketGrpcServiceGrpcClient(t *testing.T) {
-	test_services(t,
+	test_service(t,
 		[]string{"serve", "grpc", "--socket", "@echotest"},
-		"unix:@echotest",
-		"grpc",
+		[]string{"--address", "unix:@echotest", "--stack", "grpc"},
 	)
 }
 
 func TestLocalGrpcServiceGrpcClient(t *testing.T) {
-	port := "19876"
-	test_services(t,
+	const port = "19876"
+	test_service(t,
 		[]string{"serve", "grpc", "--port", port},
-		"localhost:"+port,
-		"grpc",
+		[]string{"--address", "localhost:" + port, "--stack", "grpc"},
 	)
 }
 
 func TestLocalGrpcServiceConnectGrpcClient(t *testing.T) {
-	port := "19875"
-	test_services(t,
+	const port = "19875"
+	test_service(t,
 		[]string{"serve", "grpc", "--port", port},
-		"localhost:"+port,
-		"connect-grpc",
+		[]string{"--address", "localhost:" + port, "--stack", "connect-grpc"},
 	)
 }
 
 func TestLocalConnectServiceGrpcClient(t *testing.T) {
-	port := "19874"
-	test_services(t,
+	const port = "19874"
+	test_service(t,
 		[]string{"serve", "connect", "--port", port},
-		"localhost:"+port,
-		"grpc",
+		[]string{"--address", "localhost:" + port, "--stack", "grpc"},
 	)
 }
 
 func TestLocalConnectServiceConnectClient(t *testing.T) {
-	port := "19873"
-	test_services(t,
+	const port = "19873"
+	test_service(t,
 		[]string{"serve", "connect", "--port", port},
-		"localhost:"+port,
-		"connect",
+		[]string{"--address", "localhost:" + port, "--stack", "connect"},
 	)
 }
 
 func TestLocalConnectServiceConnectGrpcClient(t *testing.T) {
-	port := "19872"
-	test_services(t,
+	const port = "19872"
+	test_service(t,
 		[]string{"serve", "connect", "--port", port},
-		"localhost:"+port,
-		"connect-grpc",
+		[]string{"--address", "localhost:" + port, "--stack", "connect-grpc"},
 	)
 }
 
 func TestLocalConnectServiceConnectGrpcWebClient(t *testing.T) {
-	port := "19871"
-	test_services(t,
+	const port = "19871"
+	test_service(t,
 		[]string{"serve", "connect", "--port", port},
-		"localhost:"+port,
-		"connect-grpc-web",
+		[]string{"--address", "localhost:" + port, "--stack", "connect-grpc-web"},
 	)
 }
 
-func test_services(t *testing.T, serverArgs []string, address, stack string) {
+func test_service(t *testing.T, serverArgs, clientArgs []string) {
 	go func() {
 		serveCmd := commands.Cmd()
 		serveCmd.SetArgs(serverArgs)
@@ -87,19 +80,19 @@ func test_services(t *testing.T, serverArgs []string, address, stack string) {
 		Expected string
 	}{
 		{
-			Args:     []string{"call", "get", "--address", address, "--stack", stack},
+			Args:     []string{"call", "get"},
 			Expected: expected_get,
 		},
 		{
-			Args:     []string{"call", "collect", "--address", address, "--stack", stack},
+			Args:     []string{"call", "collect"},
 			Expected: expected_collect,
 		},
 		{
-			Args:     []string{"call", "expand", "--address", address, "--stack", stack},
+			Args:     []string{"call", "expand"},
 			Expected: expected_expand,
 		},
 		{
-			Args:     []string{"call", "stream", "--address", address, "--stack", stack},
+			Args:     []string{"call", "stream"},
 			Expected: expected_stream,
 		},
 	}
@@ -107,7 +100,7 @@ func test_services(t *testing.T, serverArgs []string, address, stack string) {
 		cmd := commands.Cmd()
 		buffer := new(bytes.Buffer)
 		cmd.SetOut(buffer)
-		cmd.SetArgs(test.Args)
+		cmd.SetArgs(append(test.Args, clientArgs...))
 		err := cmd.Execute()
 		if err != nil {
 			t.Errorf("%s", err)
@@ -124,7 +117,6 @@ func test_services(t *testing.T, serverArgs []string, address, stack string) {
 
 const expected_get = `{"text":"Go echo get: hello"}
 `
-
 const expected_collect = `{"text":"Go echo collect: hello 0 hello 1 hello 2"}
 `
 const expected_expand = `{"text":"Go echo expand (0): 1"}
