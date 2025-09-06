@@ -4,7 +4,7 @@ SERVE_STACK=$1
 CALL_STACK=$2
 ADDRESS=$3
 
-N=10000
+N=1000
 
 tg=`echo-go call get --address=$ADDRESS -n $N --stack $CALL_STACK`
 te=`echo-go call expand --address=$ADDRESS -n $N --stack $CALL_STACK`
