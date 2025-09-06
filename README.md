@@ -4,7 +4,7 @@ This repo contains a simple echo service implemented with the official Go [gRPC]
 
 Servers and clients for all methods are implemented with both stacks and can be used for side-by-side comparisons and examples of how to use both libraries.
 
-Protocol buffer descriptions are in the [protos](/protos) directory.
+Protocol buffer descriptions are in the [proto](/proto) directory.
 
 ## Building
 
