@@ -8,6 +8,9 @@ clean:
 	go clean
 	rm -rf genproto
 
+test:
+	go test .
+
 APIS=$(shell find proto/echo -name "*.proto")
 
 descriptor:
