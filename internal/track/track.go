@@ -2,12 +2,13 @@ package track
 
 import (
 	"fmt"
+	"io"
 	"time"
 )
 
-func Measure(start time.Time, name string, count int) {
+func Measure(start time.Time, name string, count int, out io.Writer) {
 	if count > 1 {
 		elapsed := time.Since(start)
-		fmt.Printf("%s", elapsed/time.Duration(count))
+		out.Write([]byte(fmt.Sprintf("%s", elapsed/time.Duration(count))))
 	}
 }

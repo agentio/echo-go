@@ -2,13 +2,13 @@ package collect
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/agentio/echo-go/genproto/echopb"
 	"github.com/agentio/echo-go/internal/connection"
 	"github.com/agentio/echo-go/internal/track"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func Cmd() *cobra.Command {
@@ -31,7 +31,7 @@ func Cmd() *cobra.Command {
 				}
 				defer conn.Close()
 				client := echopb.NewEchoClient(conn)
-				defer track.Measure(time.Now(), "collect", n)
+				defer track.Measure(time.Now(), "collect", n, cmd.OutOrStdout())
 				for j := 0; j < n; j++ {
 					stream, err := client.Collect(cmd.Context())
 					if err != nil {
@@ -46,7 +46,12 @@ func Cmd() *cobra.Command {
 					}
 					response, err := stream.CloseAndRecv()
 					if n == 1 {
-						log.Printf("Received: %s", response.Text)
+						body, err := protojson.Marshal(response)
+						if err != nil {
+							return err
+						}
+						_, _ = cmd.OutOrStdout().Write(body)
+						_, _ = cmd.OutOrStdout().Write([]byte("\n"))
 					}
 				}
 				return nil
@@ -55,7 +60,7 @@ func Cmd() *cobra.Command {
 				if err != nil {
 					return nil
 				}
-				defer track.Measure(time.Now(), "collect", n)
+				defer track.Measure(time.Now(), "collect", n, cmd.OutOrStdout())
 				for j := 0; j < n; j++ {
 					stream := client.Collect(cmd.Context())
 					for i := 0; i < count; i++ {
@@ -70,7 +75,12 @@ func Cmd() *cobra.Command {
 						return err
 					}
 					if n == 1 {
-						log.Printf("Received: %s", response.Msg.Text)
+						body, err := protojson.Marshal(response.Msg)
+						if err != nil {
+							return err
+						}
+						_, _ = cmd.OutOrStdout().Write(body)
+						_, _ = cmd.OutOrStdout().Write([]byte("\n"))
 					}
 				}
 				return nil

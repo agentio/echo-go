@@ -3,7 +3,6 @@ package expand
 import (
 	"fmt"
 	"io"
-	"log"
 	"time"
 
 	"connectrpc.com/connect"
@@ -11,6 +10,7 @@ import (
 	"github.com/agentio/echo-go/internal/connection"
 	"github.com/agentio/echo-go/internal/track"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func Cmd() *cobra.Command {
@@ -32,14 +32,14 @@ func Cmd() *cobra.Command {
 				}
 				defer conn.Close()
 				client := echopb.NewEchoClient(conn)
-				defer track.Measure(time.Now(), "expand", n)
+				defer track.Measure(time.Now(), "expand", n, cmd.OutOrStdout())
 				for j := 0; j < n; j++ {
 					stream, err := client.Expand(cmd.Context(), &echopb.EchoRequest{Text: message})
 					if err != nil {
 						return err
 					}
 					for {
-						in, err := stream.Recv()
+						response, err := stream.Recv()
 						if err == io.EOF {
 							break
 						}
@@ -47,7 +47,12 @@ func Cmd() *cobra.Command {
 							return err
 						}
 						if n == 1 {
-							log.Printf("Received: %s", in.Text)
+							body, err := protojson.Marshal(response)
+							if err != nil {
+								return err
+							}
+							_, _ = cmd.OutOrStdout().Write(body)
+							_, _ = cmd.OutOrStdout().Write([]byte("\n"))
 						}
 					}
 				}
@@ -57,7 +62,7 @@ func Cmd() *cobra.Command {
 				if err != nil {
 					return nil
 				}
-				defer track.Measure(time.Now(), "expand", n)
+				defer track.Measure(time.Now(), "expand", n, cmd.OutOrStdout())
 				for j := 0; j < n; j++ {
 					stream, err := client.Expand(cmd.Context(), connect.NewRequest(&echopb.EchoRequest{Text: message}))
 					if err != nil {
@@ -68,9 +73,14 @@ func Cmd() *cobra.Command {
 						if !running {
 							break
 						}
-						in := stream.Msg()
+						response := stream.Msg()
 						if n == 1 {
-							log.Printf("Received: %s", in.Text)
+							body, err := protojson.Marshal(response)
+							if err != nil {
+								return err
+							}
+							_, _ = cmd.OutOrStdout().Write(body)
+							_, _ = cmd.OutOrStdout().Write([]byte("\n"))
 						}
 					}
 				}

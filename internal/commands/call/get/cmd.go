@@ -2,7 +2,6 @@ package get
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"connectrpc.com/connect"
@@ -10,6 +9,7 @@ import (
 	"github.com/agentio/echo-go/internal/connection"
 	"github.com/agentio/echo-go/internal/track"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func Cmd() *cobra.Command {
@@ -31,14 +31,19 @@ func Cmd() *cobra.Command {
 				}
 				defer conn.Close()
 				client := echopb.NewEchoClient(conn)
-				defer track.Measure(time.Now(), "get", n)
+				defer track.Measure(time.Now(), "get", n, cmd.OutOrStdout())
 				for j := 0; j < n; j++ {
 					response, err := client.Get(cmd.Context(), &echopb.EchoRequest{Text: message})
 					if err != nil {
 						return err
 					}
 					if n == 1 {
-						log.Printf("Received: %s", response.Text)
+						body, err := protojson.Marshal(response)
+						if err != nil {
+							return err
+						}
+						_, _ = cmd.OutOrStdout().Write(body)
+						_, _ = cmd.OutOrStdout().Write([]byte("\n"))
 					}
 				}
 				return nil
@@ -47,14 +52,19 @@ func Cmd() *cobra.Command {
 				if err != nil {
 					return err
 				}
-				defer track.Measure(time.Now(), "get", n)
+				defer track.Measure(time.Now(), "get", n, cmd.OutOrStdout())
 				for j := 0; j < n; j++ {
 					response, err := client.Get(cmd.Context(), connect.NewRequest(&echopb.EchoRequest{Text: message}))
 					if err != nil {
 						return err
 					}
 					if n == 1 {
-						log.Printf("Received: %s", response.Msg.Text)
+						body, err := protojson.Marshal(response.Msg)
+						if err != nil {
+							return err
+						}
+						_, _ = cmd.OutOrStdout().Write(body)
+						_, _ = cmd.OutOrStdout().Write([]byte("\n"))
 					}
 				}
 				return nil

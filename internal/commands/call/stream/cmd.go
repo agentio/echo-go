@@ -11,6 +11,7 @@ import (
 	"github.com/agentio/echo-go/internal/connection"
 	"github.com/agentio/echo-go/internal/track"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 func Cmd() *cobra.Command {
@@ -33,7 +34,7 @@ func Cmd() *cobra.Command {
 				}
 				defer conn.Close()
 				client := echopb.NewEchoClient(conn)
-				defer track.Measure(time.Now(), "stream", n)
+				defer track.Measure(time.Now(), "stream", n, cmd.OutOrStdout())
 				for j := 0; j < n; j++ {
 					stream, err := client.Stream(cmd.Context())
 					if err != nil {
@@ -42,7 +43,7 @@ func Cmd() *cobra.Command {
 					waitc := make(chan struct{})
 					go func() {
 						for {
-							in, err := stream.Recv()
+							response, err := stream.Recv()
 							if err == io.EOF {
 								close(waitc)
 								return
@@ -51,7 +52,13 @@ func Cmd() *cobra.Command {
 								log.Fatalf("Failed to receive an echo : %v", err)
 							}
 							if n == 1 {
-								log.Printf("Received: %s", in.Text)
+								body, err := protojson.Marshal(response)
+								if err != nil {
+									close(waitc)
+									return
+								}
+								_, _ = cmd.OutOrStdout().Write(body)
+								_, _ = cmd.OutOrStdout().Write([]byte("\n"))
 							}
 						}
 					}()
@@ -71,13 +78,13 @@ func Cmd() *cobra.Command {
 				if err != nil {
 					return nil
 				}
-				defer track.Measure(time.Now(), "stream", n)
+				defer track.Measure(time.Now(), "stream", n, cmd.OutOrStdout())
 				for j := 0; j < n; j++ {
 					stream := client.Stream(cmd.Context())
 					waitc := make(chan struct{})
 					go func() {
 						for {
-							in, err := stream.Receive()
+							response, err := stream.Receive()
 							if errors.Is(err, io.EOF) {
 								close(waitc)
 								return
@@ -86,7 +93,13 @@ func Cmd() *cobra.Command {
 								log.Fatalf("Failed to receive an echo : %v", err)
 							}
 							if n == 1 {
-								log.Printf("Received: %s", in.Text)
+								body, err := protojson.Marshal(response)
+								if err != nil {
+									close(waitc)
+									return
+								}
+								_, _ = cmd.OutOrStdout().Write(body)
+								_, _ = cmd.OutOrStdout().Write([]byte("\n"))
 							}
 						}
 					}()
