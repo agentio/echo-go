@@ -1,11 +1,13 @@
 package track
 
 import (
-	"log"
+	"fmt"
 	"time"
 )
 
 func Measure(start time.Time, name string, count int) {
-	elapsed := time.Since(start)
-	log.Printf("Timing: each %s request took %s", name, elapsed/time.Duration(count))
+	if count > 1 {
+		elapsed := time.Since(start)
+		fmt.Printf("%s", elapsed/time.Duration(count))
+	}
 }
