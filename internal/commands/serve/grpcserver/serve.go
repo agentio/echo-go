@@ -92,7 +92,7 @@ func (s *echoServer) Collect(stream echopb.Echo_CollectServer) error {
 }
 
 // Streams back messages as they are received in an input stream.
-func (s *echoServer) Stream(stream echopb.Echo_StreamServer) error {
+func (s *echoServer) Update(stream echopb.Echo_UpdateServer) error {
 	count := 0
 	for {
 		request, err := stream.Recv()
@@ -107,7 +107,7 @@ func (s *echoServer) Stream(stream echopb.Echo_StreamServer) error {
 		}
 		count++
 		if err := stream.Send(&echopb.EchoResponse{
-			Text: fmt.Sprintf("Go echo stream (%d): %s", count, request.Text),
+			Text: fmt.Sprintf("Go echo update (%d): %s", count, request.Text),
 		}); err != nil {
 			return err
 		}

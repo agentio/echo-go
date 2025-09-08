@@ -14,8 +14,8 @@ service Echo {
   // Collects a stream of messages and returns them concatenated when the caller closes.
   rpc Collect(stream EchoRequest) returns (EchoResponse) {}
   
-  // Streams back messages as they are received in an input stream.
-  rpc Stream(stream EchoRequest) returns (stream EchoResponse) {}
+  // Streams updates by replying with messages as they are received in an input stream.
+  rpc Update(stream EchoRequest) returns (stream EchoResponse) {}
 }
 
 message EchoRequest {

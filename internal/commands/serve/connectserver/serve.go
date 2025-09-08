@@ -103,7 +103,7 @@ func (s echoServer) Collect(
 }
 
 // Streams back messages as they are received in an input stream.
-func (s echoServer) Stream(
+func (s echoServer) Update(
 	ctx context.Context,
 	stream *connect.BidiStream[echopb.EchoRequest, echopb.EchoResponse],
 ) error {
@@ -121,7 +121,7 @@ func (s echoServer) Stream(
 		}
 		count++
 		if err := stream.Send(&echopb.EchoResponse{
-			Text: fmt.Sprintf("Go echo stream (%d): %s", count, request.Text),
+			Text: fmt.Sprintf("Go echo update (%d): %s", count, request.Text),
 		}); err != nil {
 			return err
 		}

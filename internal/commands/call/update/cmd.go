@@ -1,4 +1,4 @@
-package stream
+package update
 
 import (
 	"errors"
@@ -22,8 +22,8 @@ func Cmd() *cobra.Command {
 	var stack string
 	var n int
 	cmd := &cobra.Command{
-		Use:   "stream",
-		Short: "Call the stream method",
+		Use:   "update",
+		Short: "Call the update method",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			switch stack {
@@ -36,7 +36,7 @@ func Cmd() *cobra.Command {
 				client := echopb.NewEchoClient(conn)
 				defer track.Measure(time.Now(), "stream", n, cmd.OutOrStdout())
 				for j := 0; j < n; j++ {
-					stream, err := client.Stream(cmd.Context())
+					stream, err := client.Update(cmd.Context())
 					if err != nil {
 						return err
 					}
@@ -80,7 +80,7 @@ func Cmd() *cobra.Command {
 				}
 				defer track.Measure(time.Now(), "stream", n, cmd.OutOrStdout())
 				for j := 0; j < n; j++ {
-					stream := client.Stream(cmd.Context())
+					stream := client.Update(cmd.Context())
 					waitc := make(chan struct{})
 					go func() {
 						for {

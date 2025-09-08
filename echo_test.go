@@ -99,8 +99,8 @@ func test_service(t *testing.T, serverArgs, clientArgs []string) {
 			Expected: expected_expand,
 		},
 		{
-			Args:     []string{"call", "stream"},
-			Expected: expected_stream,
+			Args:     []string{"call", "update"},
+			Expected: expected_update,
 		},
 	}
 	for _, test := range tests {
@@ -130,10 +130,10 @@ const expected_expand = `{"text":"Go echo expand (0): 1"}
 {"text":"Go echo expand (1): 2"}
 {"text":"Go echo expand (2): 3"}
 `
-const expected_stream = `{"text":"Go echo stream (1): hello 0"}
-{"text":"Go echo stream (2): hello 1"}
-{"text":"Go echo stream (3): hello 2"}
-{"text":"Go echo stream (4): hello 3"}
-{"text":"Go echo stream (5): hello 4"}
-{"text":"Go echo stream (6): hello 5"}
+const expected_update = `{"text":"Go echo update (1): hello 0"}
+{"text":"Go echo update (2): hello 1"}
+{"text":"Go echo update (3): hello 2"}
+{"text":"Go echo update (4): hello 3"}
+{"text":"Go echo update (5): hello 4"}
+{"text":"Go echo update (6): hello 5"}
 `

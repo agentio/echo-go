@@ -80,11 +80,11 @@ func measureCollect(b *testing.B, client echopb.EchoClient) {
 	}
 }
 
-func measureStream(b *testing.B, client echopb.EchoClient) {
+func measureUpdate(b *testing.B, client echopb.EchoClient) {
 	message := "hello"
 	count := 6
 	for b.Loop() {
-		stream, err := client.Stream(b.Context())
+		stream, err := client.Update(b.Context())
 		if err != nil {
 			b.FailNow()
 		}
@@ -149,8 +149,8 @@ func BenchmarkEchoCollectSocket(b *testing.B) {
 	measureCollect(b, echopb.NewEchoClient(conn))
 }
 
-func BenchmarkEchoStreamSocket(b *testing.B) {
-	socket := "@echostream"
+func BenchmarkEchoUpdateSocket(b *testing.B) {
+	socket := "@echoupdate"
 	go runServerOnSocket(socket)
 	pause()
 	conn, err := connection.NewGRPCConnection("unix:"+socket, false)
@@ -158,7 +158,7 @@ func BenchmarkEchoStreamSocket(b *testing.B) {
 		b.FailNow()
 	}
 	defer conn.Close()
-	measureStream(b, echopb.NewEchoClient(conn))
+	measureUpdate(b, echopb.NewEchoClient(conn))
 }
 
 func BenchmarkEchoGetPort(b *testing.B) {
@@ -197,7 +197,7 @@ func BenchmarkEchoCollectPort(b *testing.B) {
 	measureCollect(b, echopb.NewEchoClient(conn))
 }
 
-func BenchmarkEchoStreamPort(b *testing.B) {
+func BenchmarkEchoUpdatePort(b *testing.B) {
 	port := "21004"
 	go runServerOnPort(port)
 	pause()
@@ -206,5 +206,5 @@ func BenchmarkEchoStreamPort(b *testing.B) {
 		b.FailNow()
 	}
 	defer conn.Close()
-	measureStream(b, echopb.NewEchoClient(conn))
+	measureUpdate(b, echopb.NewEchoClient(conn))
 }
