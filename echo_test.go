@@ -17,6 +17,13 @@ func TestSocketGrpcServiceGrpcClient(t *testing.T) {
 	)
 }
 
+func TestSocketConnectServiceGrpcClient(t *testing.T) {
+	test_service(t,
+		[]string{"serve", "connect", "--socket", "@echotestconnect"},
+		[]string{"--address", "unix:@echotestconnect", "--stack", "grpc"},
+	)
+}
+
 func TestLocalGrpcServiceGrpcClient(t *testing.T) {
 	const port = "19876"
 	test_service(t,
