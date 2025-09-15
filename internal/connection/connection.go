@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"connectrpc.com/connect"
@@ -38,6 +39,18 @@ func NewConnectEchoClient(address string, useTLS bool, stack string) (echopbconn
 	if useTLS {
 		url = "https://" + address
 		httpClient = http.DefaultClient
+	} else if strings.HasPrefix(address, "unix:") {
+		url = strings.ReplaceAll(address, "unix:@", "http://")
+		httpClient = &http.Client{
+			Transport: &http2.Transport{
+				AllowHTTP: true,
+				DialTLSContext: func(ctx context.Context, network string, addr string, cfg *tls.Config) (net.Conn, error) {
+					network = "unix"
+					addr = "@" + strings.TrimSuffix(strings.TrimPrefix(addr, "http://"), ":80")
+					return net.DialTimeout(network, addr, 5*time.Second)
+				},
+			},
+		}
 	} else {
 		url = "http://" + address
 		httpClient = &http.Client{

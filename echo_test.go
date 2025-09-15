@@ -10,19 +10,59 @@ import (
 	"github.com/agentio/echo-go/internal/commands"
 )
 
+// Socket gRPC
+
 func TestSocketGrpcServiceGrpcClient(t *testing.T) {
+	socket := "@echotestgrpc"
 	test_service(t,
-		[]string{"serve", "grpc", "--socket", "@echotest"},
-		[]string{"--address", "unix:@echotest", "--stack", "grpc"},
+		[]string{"serve", "grpc", "--socket", socket},
+		[]string{"--address", "unix:" + socket, "--stack", "grpc"},
 	)
 }
 
-func TestSocketConnectServiceGrpcClient(t *testing.T) {
+func TestSocketGrpcServiceConnectGrpcClient(t *testing.T) {
+	const socket = "@echotestgrpc1"
 	test_service(t,
-		[]string{"serve", "connect", "--socket", "@echotestconnect"},
-		[]string{"--address", "unix:@echotestconnect", "--stack", "grpc"},
+		[]string{"serve", "grpc", "--socket", socket},
+		[]string{"--address", "unix:" + socket, "--stack", "connect-grpc"},
 	)
 }
+
+// Socket Connect
+
+func TestSocketConnectServiceGrpcClient(t *testing.T) {
+	socket := "@echotestconnect"
+	test_service(t,
+		[]string{"serve", "grpc", "--socket", socket},
+		[]string{"--address", "unix:" + socket, "--stack", "grpc"},
+	)
+}
+
+func TestSocketConnectServiceConnectClient(t *testing.T) {
+	const socket = "@echotestconnect1"
+	test_service(t,
+		[]string{"serve", "connect", "--socket", socket},
+		[]string{"--address", "unix:" + socket, "--stack", "connect"},
+	)
+}
+
+func TestSocketConnectServiceConnectGrpcClient(t *testing.T) {
+	const socket = "@echotestconnect2"
+	test_service(t,
+		[]string{"serve", "connect", "--socket", socket},
+		[]string{"--address", "unix:" + socket, "--stack", "connect-grpc"},
+	)
+}
+
+func TestSocketConnectServiceConnectGrpcWebClient(t *testing.T) {
+	const socket = "@echotestconnect3"
+	test_service(t,
+		[]string{"serve", "connect", "--socket", socket},
+		[]string{"--address", "unix:" + socket, "--stack", "connect-grpc-web"},
+	)
+}
+
+// Local gRPC
 
 func TestLocalGrpcServiceGrpcClient(t *testing.T) {
 	const port = "19876"
@@ -39,6 +79,8 @@ func TestLocalGrpcServiceConnectGrpcClient(t *testing.T) {
 		[]string{"--address", "localhost:" + port, "--stack", "connect-grpc"},
 	)
 }
+
+// Local Connect
 
 func TestLocalConnectServiceGrpcClient(t *testing.T) {
 	const port = "19874"
