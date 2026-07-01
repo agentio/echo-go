@@ -10,7 +10,6 @@ RUN make grpc
 RUN make connect
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o echo-go .
 
-FROM alpine:3
-RUN apk add --no-cache ca-certificates
+FROM gcr.io/distroless/static-debian13
 COPY --from=builder /app/echo-go /usr/local/bin/echo-go
 CMD ["/usr/local/bin/echo-go", "serve",  "connect"]
